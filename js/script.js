@@ -4,7 +4,7 @@
  wa: رقم واتساب لاستقبال تأكيدات الحضور بصيغة 20XXXXXXXXXX
 */
 
-var C={date:"2026-12-03T16:30:00+02:00",map:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent("قصر الأمير طاز"),wa:""};
+var C={date:"2026-12-03T16:30:00+02:00",map:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent("قصر الأمير طاز"),wa:"201005113517"};
 var $=function(i){return document.getElementById(i)};
 $('map').href=C.map;
 function pet(){for(var i=0;i<9;i++){var p=document.createElement('i');p.className='pt';p.style.left=(5+i*11)+'%';p.style.animationDuration=(9+i%4*3)+'s';p.style.animationDelay=(i*1.3)+'s';document.body.appendChild(p)}}
@@ -27,56 +27,40 @@ $('ok').style.display='block';
 if(C.wa){window.open('https://wa.me/'+C.wa+'?text='+encodeURIComponent((yes?'✅ سأحضر: ':'❌ أعتذر عن الحضور: ')+n+(m?'\n'+m:'')),'_blank')}};
 
 
+const form = document.getElementById('f');
+const okMsg = document.getElementById('ok');
+const submitBtn = form.querySelector('button[type="submit"]');
 
-  const form = document.getElementById('f');
-  const okMsg = document.getElementById('ok');
-  const submitBtn = form.querySelector('button[type="submit"]');
+okMsg.style.display = 'none';
 
-  // بنخفي رسالة النجاح في الأول عشان تظهر بس بعد الإرسال
-  okMsg.style.display = 'none';
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // 1. تغيير شكل الزرار وفضل إظهار رسالة النجاح فوراً لراحة المستخدم
+  submitBtn.disabled = true;
+  submitBtn.style.display = 'none'; // بنخفي الزرار خالص
+  form.reset();
+  okMsg.style.display = 'block'; // بتظهر رسالة "شكراً لك! تم تسجيل ردك" فوراً
+  
+  // 2. تجميع البيانات وإرسالها في الخلفية بصمت تام من غير ما نعطل الصفحة
+  const formData = new FormData();
+  formData.append('الاسم', document.getElementById('nm').value);
+  
+  const attendanceVal = form.querySelector('input[name="a"]:checked').value;
+  formData.append('الحضور', attendanceVal === 'yes' ? 'سيحضر بكل سرور' : 'يعتذر عن الحضور');
+  
+  formData.append('الرسالة', document.getElementById('ms').value);
+  
+  formData.append('_subject', 'رد جديد على دعوة الفرح 💍');
+  formData.append('_template', 'table');
+  formData.append('_captcha', 'false');
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    submitBtn.disabled = true;
-    submitBtn.innerText = 'جاري الإرسال...';
-
-    // بنضيف الـ name attributes ديناميكياً من غير ما نغير شكل الـ HTML بتاعك
-    const formData = new FormData();
-    formData.append('الاسم', document.getElementById('nm').value);
-    
-    const attendanceVal = form.querySelector('input[name="a"]:checked').value;
-    formData.append('الحضور', attendanceVal === 'yes' ? 'سيحضر بكل سرور' : 'يعتذر عن الحضور');
-    
-    formData.append('الرسالة', document.getElementById('ms').value);
-    
-    // إعدادات FormSubmit
-    formData.append('_subject', 'رد جديد على دعوة الفرح 💍');
-    formData.append('_template', 'table');
-    formData.append('_captcha', 'false');
-
-    try {
-      // حطي إيميل العروسة هنا بدل HER_EMAIL@gmail.com
-      const response = await fetch('https://formsubmit.co/ajax/mayaromer10@gmail.com', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        form.reset();
-        okMsg.style.display = 'block';
-        submitBtn.style.display = 'none';
-      } else {
-        alert('حصلت مشكلة أثناء الإرسال، جرب تاني.');
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'إرسال';
-      }
-    } catch (error) {
-      alert('تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
-      submitBtn.disabled = false;
-      submitBtn.innerText = 'إرسال';
+  // إرسال في الخلفية (Background Fetch) مش هتفرق لو السيرفر اتأخر، الضيف شاف رسالة الشكر خلاص
+  fetch('https://formsubmit.co/ajax/mayaromer10@gmail.com', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
     }
-  });
+  }).catch(err => console.log('Background send error:', err));
+});
