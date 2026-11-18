@@ -15,7 +15,7 @@ function setAS(v){AS.on=v;AS.last=0;$('as').textContent=v?'⏸':'▶';if(v)reque
 document.addEventListener('focusin',function(){if(AS.on)setAS(false)});
 $('as').onclick=function(){clearTimeout(tm);if(!AS.on&&innerHeight+scrollY>=document.documentElement.scrollHeight-2)scrollTo(0,0);setAS(!AS.on)};
 $('mu').onclick=function(){if(A.paused){A.play();this.classList.remove('off')}else{A.pause();this.classList.add('off')}};
-$('gate').onclick=function(){var g=$('gate');if(g.classList.contains('open'))return;g.classList.add('open');$('main').classList.add('go');document.body.classList.remove('lock');pet();document.body.classList.add('on');A.volume=.55;A.play().catch(function(){});tm=setTimeout(function(){setAS(true)},7500);setTimeout(function(){g.style.display='none'},3200)};
+$('gate').onclick=function(){var g=$('gate');if(g.classList.contains('open'))return;g.classList.add('open');$('main').classList.add('go');document.body.classList.remove('lock');pet();document.body.classList.add('on');A.volume=.55;A.play().catch(function(){});tm=setTimeout(function(){setAS(true)},5500);setTimeout(function(){g.style.display='none'},3200)};
 function t(){var d=Math.max(0,new Date(C.date)-new Date()),v=[Math.floor(d/864e5),Math.floor(d/36e5)%24,Math.floor(d/6e4)%60,Math.floor(d/1e3)%60];v.forEach(function(x,i){$('c'+i).textContent=x.toLocaleString('ar-EG')})}
 t();setInterval(t,1000);
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
@@ -25,3 +25,58 @@ $('f').onsubmit=async function(e){e.preventDefault();var yes=document.querySelec
 try{var db=await claude.use('db');if(db)await db.collection('rsvps').doc(Date.now()+'').set({name:n,attending:yes,message:m,at:Date.now()})}catch(x){}
 $('ok').style.display='block';
 if(C.wa){window.open('https://wa.me/'+C.wa+'?text='+encodeURIComponent((yes?'✅ سأحضر: ':'❌ أعتذر عن الحضور: ')+n+(m?'\n'+m:'')),'_blank')}};
+
+
+
+  const form = document.getElementById('f');
+  const okMsg = document.getElementById('ok');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  // بنخفي رسالة النجاح في الأول عشان تظهر بس بعد الإرسال
+  okMsg.style.display = 'none';
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'جاري الإرسال...';
+
+    // بنضيف الـ name attributes ديناميكياً من غير ما نغير شكل الـ HTML بتاعك
+    const formData = new FormData();
+    formData.append('الاسم', document.getElementById('nm').value);
+    
+    const attendanceVal = form.querySelector('input[name="a"]:checked').value;
+    formData.append('الحضور', attendanceVal === 'yes' ? 'سيحضر بكل سرور' : 'يعتذر عن الحضور');
+    
+    formData.append('الرسالة', document.getElementById('ms').value);
+    
+    // إعدادات FormSubmit
+    formData.append('_subject', 'رد جديد على دعوة الفرح 💍');
+    formData.append('_template', 'table');
+    formData.append('_captcha', 'false');
+
+    try {
+      // حطي إيميل العروسة هنا بدل HER_EMAIL@gmail.com
+      const response = await fetch('https://formsubmit.co/ajax/mayaromer10@gmail.com', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        form.reset();
+        okMsg.style.display = 'block';
+        submitBtn.style.display = 'none';
+      } else {
+        alert('حصلت مشكلة أثناء الإرسال، جرب تاني.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'إرسال';
+      }
+    } catch (error) {
+      alert('تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'إرسال';
+    }
+  });
