@@ -93,34 +93,15 @@ if ($('gate')) {
     document.body.classList.remove('lock');
     pet();
     document.body.classList.add('on');
-
     if (A) {
       A.volume = 0.55;
-      var startAt = 99; // 1 دقيقة و 39 ثانية
-
-      function playFromTime() {
-        try {
-          if (A.duration && startAt < A.duration) {
-            A.currentTime = startAt;
-          } else {
-            A.currentTime = startAt;
-          }
-        } catch (err) {}
-        A.play().catch(function () {});
-      }
-
-      if (A.readyState >= 1) {
-        playFromTime();
-      } else {
-        A.addEventListener('loadedmetadata', playFromTime, { once: true });
-        A.play().catch(function () {});
-      }
+      A.play().catch(function () {});
     }
-
     tm = setTimeout(function () { setAS(true); }, 5500);
     setTimeout(function () { g.style.display = 'none'; }, 3200);
   };
 }
+
 // العداد التنازلي
 function t() {
   var d = Math.max(0, new Date(C.date) - new Date());
